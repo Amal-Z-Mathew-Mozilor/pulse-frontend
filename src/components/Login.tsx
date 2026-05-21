@@ -72,11 +72,12 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
         <GoogleLogin
           onSuccess={(r) => r.credential && handleGoogleCredential(r.credential)}
           onError={() => setError("Google sign-in was cancelled or failed")}
-          theme="outline"
+          theme="filled_black"
           size="large"
           text="continue_with"
-          shape="rectangular"
-          width="100%"
+          shape="pill"
+          width="320"
+          logo_alignment="left"
         />
       </div>
     </div>
