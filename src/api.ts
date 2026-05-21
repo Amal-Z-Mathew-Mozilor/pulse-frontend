@@ -189,6 +189,7 @@ export const auth = {
     username: string,
     email: string,
     password: string,
+    mode: "create" | "join",
     company_name?: string,
   ): Promise<{ message: string; email: string }> => {
     const signupHeaders: Record<string, string> = { "Content-Type": "application/json" };
@@ -196,7 +197,7 @@ export const auth = {
     const res = await fetch(API_BASE + "/auth/signup", {
       method: "POST",
       headers: signupHeaders,
-      body: JSON.stringify({ username, email, password, company_name }),
+      body: JSON.stringify({ username, email, password, mode, company_name }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Signup failed" }));
