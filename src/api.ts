@@ -200,13 +200,13 @@ export const auth = {
     return res.json();
   },
 
-  googleLogin: async (credential: string): Promise<{ access_token: string; token_type: string }> => {
+  googleLogin: async (accessToken: string): Promise<{ access_token: string; token_type: string }> => {
     const headers: Record<string, string> = { "Content-Type": "application/json" };
     if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
     const res = await fetch(`${API_BASE}/auth/google`, {
       method: "POST",
       headers,
-      body: JSON.stringify({ credential }),
+      body: JSON.stringify({ access_token: accessToken }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Google sign-in failed" }));

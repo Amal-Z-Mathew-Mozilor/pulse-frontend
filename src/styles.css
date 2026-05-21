@@ -818,35 +818,30 @@ textarea { width: 100%; resize: vertical; min-height: 80px; }
   height: 1px;
   background: var(--border);
 }
-.login-google-btn-wrap {
+.login-google-btn {
   display: flex;
+  align-items: center;
   justify-content: center;
+  gap: 10px;
   width: 100%;
-  position: relative;
-  padding: 1.5px;
-  border-radius: 999px;
-  background: linear-gradient(135deg, rgba(91, 140, 255, 0.4), rgba(124, 92, 255, 0.4));
-  transition: background 0.2s, box-shadow 0.2s, transform 0.1s;
+  padding: 11px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: border-color 0.15s, background 0.15s, box-shadow 0.15s, transform 0.1s;
 }
-.login-google-btn-wrap:hover {
-  background: linear-gradient(135deg, rgba(91, 140, 255, 0.95), rgba(124, 92, 255, 0.95));
-  box-shadow: 0 0 24px rgba(91, 140, 255, 0.35);
+.login-google-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+  background: rgba(91, 140, 255, 0.08);
+  box-shadow: 0 0 0 3px rgba(91, 140, 255, 0.12);
 }
-.login-google-btn-wrap:active { transform: translateY(1px); }
-.login-google-btn-wrap > div {
-  width: 100%;
-  display: flex;
-  justify-content: center;
-  border-radius: 999px;
-  overflow: hidden;
-}
-/* Google embeds its button in an iframe — we can't restyle inside it, but the
-   wrapper above gives it a gradient pill border that glows on hover. */
-.login-google-btn-wrap iframe {
-  border-radius: 999px !important;
-  margin: 0 auto !important;
-}
+.login-google-btn:active:not(:disabled) { transform: translateY(1px); }
+.login-google-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.login-google-btn svg { flex-shrink: 0; }
 
 .login-foot {
   border-top: 1px solid var(--border);
