@@ -185,6 +185,39 @@ export const auth = {
     return res.json();
   },
 
+  forgotPassword: async (email: string): Promise<{ message: string }> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
+    const res = await fetch(`${API_BASE}/auth/forgot-password`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ email }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Request failed" }));
+      throw new Error(err.detail || `${res.status}`);
+    }
+    return res.json();
+  },
+
+  resetPassword: async (
+    token: string,
+    new_password: string,
+  ): Promise<{ access_token: string; token_type: string }> => {
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
+    const res = await fetch(`${API_BASE}/auth/reset-password`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ token, new_password }),
+    });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Reset failed" }));
+      throw new Error(err.detail || `${res.status}`);
+    }
+    return res.json();
+  },
+
   signup: async (
     username: string,
     email: string,
