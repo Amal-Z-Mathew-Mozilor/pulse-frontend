@@ -8,8 +8,8 @@ type Mode = "signin" | "create_workspace" | "join_workspace" | "forgot";
 
 export default function Login({ onLogin }: { onLogin: () => void }) {
   const [mode, setMode] = useState<Mode>("signin");
-  const [identifier, setIdentifier] = useState(""); // username OR email at sign in
-  const [username, setUsername] = useState("");      // signup only
+  const [identifier, setIdentifier] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -39,26 +39,6 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     }
   }
 
-  const googleBlock = GOOGLE_ENABLED ? (
-    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--muted)", fontSize: 11 }}>
-        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-        <span>OR</span>
-        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
-      </div>
-      <div style={{ display: "flex", justifyContent: "center" }}>
-        <GoogleLogin
-          onSuccess={(r) => r.credential && handleGoogleCredential(r.credential)}
-          onError={() => setError("Google sign-in was cancelled or failed")}
-          theme="filled_black"
-          size="large"
-          text="continue_with"
-          shape="rectangular"
-        />
-      </div>
-    </div>
-  ) : null;
-
   async function submit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
@@ -75,7 +55,6 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
         const result = await auth.signup(username, email, password, "join");
         setPendingEmail(result.email);
       } else {
-        // forgot
         await auth.forgotPassword(email);
         setResetSent(true);
       }
@@ -86,164 +65,157 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     }
   }
 
-  // After signup — "check your email" screen
+  const googleBlock = GOOGLE_ENABLED ? (
+    <div className="login-google">
+      <div className="login-divider"><span>or</span></div>
+      <div className="login-google-btn-wrap">
+        <GoogleLogin
+          onSuccess={(r) => r.credential && handleGoogleCredential(r.credential)}
+          onError={() => setError("Google sign-in was cancelled or failed")}
+          theme="outline"
+          size="large"
+          text="continue_with"
+          shape="rectangular"
+          width="100%"
+        />
+      </div>
+    </div>
+  ) : null;
+
+  // ---- Confirmation screens ----
+
   if (pendingEmail) {
     return (
       <Shell>
-        <div style={{ fontSize: 40, textAlign: "center" }}>📬</div>
-        <h2 style={{ margin: 0, fontSize: 20, textAlign: "center" }}>Check your email</h2>
-        <p style={{ margin: "10px 0 0", color: "var(--muted)", fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
+        <div className="login-icon-circle">📬</div>
+        <h2 className="login-heading">Check your email</h2>
+        <p className="login-sub">
           We sent a verification link to<br />
-          <strong style={{ color: "var(--fg)" }}>{pendingEmail}</strong>
+          <strong style={{ color: "var(--text)" }}>{pendingEmail}</strong>
         </p>
-        <p style={{ margin: "10px 0 0", color: "var(--muted)", fontSize: 13, textAlign: "center" }}>
-          Click the link to activate your account. The link expires in 24 hours.
+        <p className="login-hint">
+          Click the link to activate your account. Expires in 24 hours.
         </p>
-        <button type="button" onClick={() => switchMode("signin")} style={{ marginTop: 8 }}>
+        <button className="login-primary" type="button" onClick={() => switchMode("signin")}>
           Back to sign in
         </button>
       </Shell>
     );
   }
 
-  // After forgot-password submit
   if (resetSent) {
     return (
       <Shell>
-        <div style={{ fontSize: 40, textAlign: "center" }}>📨</div>
-        <h2 style={{ margin: 0, fontSize: 20, textAlign: "center" }}>Check your email</h2>
-        <p style={{ margin: "10px 0 0", color: "var(--muted)", fontSize: 14, lineHeight: 1.6, textAlign: "center" }}>
-          If an account exists for that email, we sent a password reset link.
-        </p>
-        <p style={{ margin: "10px 0 0", color: "var(--muted)", fontSize: 13, textAlign: "center" }}>
-          The link expires in 1 hour. Didn't get it? Check spam or request a new one.
-        </p>
-        <button type="button" onClick={() => switchMode("signin")} style={{ marginTop: 8 }}>
+        <div className="login-icon-circle">📨</div>
+        <h2 className="login-heading">Check your email</h2>
+        <p className="login-sub">If an account exists for that email, we sent a password reset link.</p>
+        <p className="login-hint">Expires in 1 hour. Check spam if you don't see it.</p>
+        <button className="login-primary" type="button" onClick={() => switchMode("signin")}>
           Back to sign in
         </button>
       </Shell>
     );
   }
 
-  // Forgot-password form
   if (mode === "forgot") {
     return (
       <Shell>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22 }}>Reset your password</h1>
-          <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: 13 }}>
-            Enter your account email — we'll send you a reset link.
-          </p>
-        </div>
-        {error && <div className="banner warn" style={{ marginBottom: 0, fontSize: 13 }}>{error}</div>}
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Field label="Email">
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={loading} autoComplete="email" placeholder="you@yourcompany.com" />
+        <Brand title="Reset your password" subtitle="We'll email you a secure link to choose a new one." />
+        {error && <div className="login-error">{error}</div>}
+        <form onSubmit={submit} className="login-form">
+          <Field label="Email" htmlFor="forgot-email">
+            <input id="forgot-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required disabled={loading} autoComplete="email" placeholder="you@yourcompany.com" />
           </Field>
-          <button type="submit" disabled={loading || !email} style={{ marginTop: 4 }}>
+          <button type="submit" className="login-primary" disabled={loading || !email}>
             {loading ? "Sending…" : "Send reset link"}
           </button>
         </form>
-        <div style={{ textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
-          <LinkBtn onClick={() => switchMode("signin")}>Back to sign in</LinkBtn>
+        <div className="login-foot">
+          <LinkBtn onClick={() => switchMode("signin")}>← Back to sign in</LinkBtn>
         </div>
       </Shell>
     );
   }
 
-  // Sign in
   if (mode === "signin") {
     return (
       <Shell>
-        <div>
-          <h1 style={{ margin: 0, fontSize: 22, letterSpacing: "0.02em" }}>Pulse</h1>
-          <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: 13 }}>
-            Organizational memory for your team
-          </p>
-        </div>
-
-        {error && <div className="banner warn" style={{ marginBottom: 0, fontSize: 13 }}>{error}</div>}
-
-        <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-          <Field label="Username or Email">
-            <input type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoComplete="username" disabled={loading} placeholder="amal_mathew or you@company.com" />
+        <Brand title="Welcome back" subtitle="Sign in to your Pulse workspace." />
+        {error && <div className="login-error">{error}</div>}
+        <form onSubmit={submit} className="login-form">
+          <Field label="Username or Email" htmlFor="login-id">
+            <input id="login-id" type="text" value={identifier} onChange={(e) => setIdentifier(e.target.value)} required autoComplete="username" disabled={loading} placeholder="amal_mathew or you@company.com" />
           </Field>
-          <Field label="Password">
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" disabled={loading} placeholder="••••••••" />
+          <Field label="Password" htmlFor="login-pw" hint={<LinkBtn onClick={() => switchMode("forgot")}>Forgot?</LinkBtn>}>
+            <input id="login-pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" disabled={loading} placeholder="••••••••" />
           </Field>
-          <div style={{ textAlign: "right", marginTop: -8 }}>
-            <LinkBtn onClick={() => switchMode("forgot")}>Forgot password?</LinkBtn>
-          </div>
-          <button type="submit" disabled={loading || !identifier || !password} style={{ marginTop: 4 }}>
+          <button type="submit" className="login-primary" disabled={loading || !identifier || !password}>
             {loading ? "Signing in…" : "Sign in"}
           </button>
         </form>
 
         {googleBlock}
 
-        <div style={{ borderTop: "1px solid var(--border)", paddingTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
-          <div style={{ fontSize: 12, color: "var(--muted)", textAlign: "center", marginBottom: 4 }}>New to Pulse?</div>
-          <button type="button" onClick={() => switchMode("create_workspace")} style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--fg)" }}>
-            Create a workspace for my company
-          </button>
-          <button type="button" onClick={() => switchMode("join_workspace")} style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--fg)" }}>
-            Join my company's existing workspace
-          </button>
+        <div className="login-foot">
+          <span className="login-foot-prompt">New to Pulse?</span>
+          <div className="login-foot-actions">
+            <button className="login-secondary" type="button" onClick={() => switchMode("create_workspace")}>
+              Create workspace
+            </button>
+            <button className="login-secondary" type="button" onClick={() => switchMode("join_workspace")}>
+              Join workspace
+            </button>
+          </div>
         </div>
       </Shell>
     );
   }
 
-  // create_workspace or join_workspace
   const isCreate = mode === "create_workspace";
-  const heading = isCreate ? "Create workspace" : "Join your workspace";
+  const heading = isCreate ? "Create your workspace" : "Join your workspace";
   const subtitle = isCreate
     ? "You'll be the admin of your company's Pulse workspace."
     : "Your company already has a workspace. We'll add you to it.";
   const submitLabel = loading
-    ? (isCreate ? "Creating workspace…" : "Joining workspace…")
+    ? (isCreate ? "Creating…" : "Joining…")
     : (isCreate ? "Create workspace" : "Join workspace");
   const disabled = loading || !username || !email || !password || (isCreate && !companyName);
 
   return (
     <Shell>
-      <div>
-        <h1 style={{ margin: 0, fontSize: 22 }}>{heading}</h1>
-        <p style={{ margin: "6px 0 0", color: "var(--muted)", fontSize: 13 }}>{subtitle}</p>
-      </div>
-
-      {error && <div className="banner warn" style={{ marginBottom: 0, fontSize: 13 }}>{error}</div>}
-
-      <form onSubmit={submit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+      <Brand title={heading} subtitle={subtitle} />
+      {error && <div className="login-error">{error}</div>}
+      <form onSubmit={submit} className="login-form">
         {isCreate && (
-          <Field label="Company Name" hint="The display name for your workspace.">
-            <input type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required maxLength={256} disabled={loading} placeholder="Acme Corp" />
+          <Field label="Company Name" htmlFor="cn" hint="The display name for your workspace.">
+            <input id="cn" type="text" value={companyName} onChange={(e) => setCompanyName(e.target.value)} required maxLength={256} disabled={loading} placeholder="Acme Corp" />
           </Field>
         )}
-        <Field label="Username">
-          <input type="text" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={64} autoComplete="username" disabled={loading} placeholder="Choose a username" />
+        <Field label="Username" htmlFor="un">
+          <input id="un" type="text" value={username} onChange={(e) => setUsername(e.target.value)} required minLength={3} maxLength={64} autoComplete="username" disabled={loading} placeholder="Choose a username" />
         </Field>
         <Field
           label="Work Email"
+          htmlFor="em"
           hint={isCreate
-            ? "Use your company email. Your domain becomes your workspace identity."
-            : "Must match your company's domain. Generic email providers are blocked."}
+            ? "Your domain becomes your workspace identity."
+            : "Must match your company's domain."}
         >
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" disabled={loading} placeholder="you@yourcompany.com" />
+          <input id="em" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" disabled={loading} placeholder="you@yourcompany.com" />
         </Field>
-        <Field label="Password">
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" disabled={loading} placeholder="At least 8 characters" />
+        <Field label="Password" htmlFor="pw">
+          <input id="pw" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8} autoComplete="new-password" disabled={loading} placeholder="At least 8 characters" />
         </Field>
-        <button type="submit" disabled={disabled} style={{ marginTop: 4 }}>{submitLabel}</button>
+        <button type="submit" className="login-primary" disabled={disabled}>{submitLabel}</button>
       </form>
 
       {googleBlock}
 
-      <div style={{ textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
+      <div className="login-foot">
         {isCreate ? (
-          <>Joining an existing workspace? <LinkBtn onClick={() => switchMode("join_workspace")}>Join instead</LinkBtn></>
+          <span>Already have a workspace? <LinkBtn onClick={() => switchMode("join_workspace")}>Join instead</LinkBtn></span>
         ) : (
-          <>Setting up Pulse for your company? <LinkBtn onClick={() => switchMode("create_workspace")}>Create workspace</LinkBtn></>
+          <span>Setting up Pulse for your company? <LinkBtn onClick={() => switchMode("create_workspace")}>Create one</LinkBtn></span>
         )}
         <div style={{ marginTop: 8 }}>
           Already have an account? <LinkBtn onClick={() => switchMode("signin")}>Sign in</LinkBtn>
@@ -253,32 +225,61 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-// ---------- helpers ----------
+// ---- helpers ----
 
 function Shell({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", background: "var(--bg)" }}>
-      <div style={{ background: "var(--panel)", border: "1px solid var(--border)", borderRadius: 12, padding: "40px 48px", width: 400, display: "flex", flexDirection: "column", gap: 20 }}>
-        {children}
-      </div>
+    <div className="login-page">
+      <aside className="login-hero">
+        <div className="login-hero-inner">
+          <div className="login-logo">
+            <span className="login-logo-dot" />
+            <span className="login-logo-text">Pulse</span>
+          </div>
+          <h1 className="login-hero-title">
+            Stop building<br />the same thing<br />twice.
+          </h1>
+          <p className="login-hero-sub">
+            Pulse watches your Jira workspaces and remembers what your teams have already built.
+          </p>
+          <ul className="login-hero-list">
+            <li><span>🔍</span> Detect duplicate work across teams in real time</li>
+            <li><span>📋</span> Auto-generate documentation from finished tickets</li>
+            <li><span>⚠️</span> Track deprecations before they break things</li>
+          </ul>
+          <div className="login-hero-foot">Organizational memory, powered by Claude.</div>
+        </div>
+      </aside>
+      <main className="login-card-wrap">
+        <div className="login-card">{children}</div>
+      </main>
     </div>
   );
 }
 
-function Field({ label, hint, children }: { label: string; hint?: string; children: React.ReactNode }) {
+function Brand({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
-    <div className="field" style={{ marginBottom: 0 }}>
-      <label>{label}</label>
+    <div className="login-brand">
+      <h2 className="login-heading">{title}</h2>
+      {subtitle && <p className="login-sub">{subtitle}</p>}
+    </div>
+  );
+}
+
+function Field({ label, htmlFor, hint, children }: { label: string; htmlFor?: string; hint?: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <div className="login-field">
+      <div className="login-field-label-row">
+        <label htmlFor={htmlFor}>{label}</label>
+        {hint && <span className="login-field-hint">{hint}</span>}
+      </div>
       {children}
-      {hint && <span style={{ fontSize: 11, color: "var(--muted)", marginTop: 3, display: "block" }}>{hint}</span>}
     </div>
   );
 }
 
 function LinkBtn({ onClick, children }: { onClick: () => void; children: React.ReactNode }) {
   return (
-    <button type="button" onClick={onClick} style={{ background: "none", border: "none", color: "var(--accent, #4f8bff)", cursor: "pointer", padding: 0, fontSize: 13 }}>
-      {children}
-    </button>
+    <button type="button" onClick={onClick} className="login-link">{children}</button>
   );
 }
