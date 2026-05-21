@@ -178,13 +178,14 @@ export const auth = {
     username: string,
     email: string,
     password: string,
-  ): Promise<{ access_token: string; token_type: string }> => {
+    company_name?: string,
+  ): Promise<{ message: string; email: string }> => {
     const signupHeaders: Record<string, string> = { "Content-Type": "application/json" };
     if (API_BASE) signupHeaders["ngrok-skip-browser-warning"] = "true";
     const res = await fetch(API_BASE + "/auth/signup", {
       method: "POST",
       headers: signupHeaders,
-      body: JSON.stringify({ username, email, password }),
+      body: JSON.stringify({ username, email, password, company_name }),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Signup failed" }));
