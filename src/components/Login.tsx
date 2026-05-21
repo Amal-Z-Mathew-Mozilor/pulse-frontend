@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { GoogleLogin } from "@react-oauth/google";
 import { auth, setToken } from "../api";
+
+const GOOGLE_ENABLED = !!(import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined);
 
 type Mode = "signin" | "create_workspace" | "join_workspace" | "forgot";
 
@@ -21,6 +24,40 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
     setPendingEmail(null);
     setResetSent(false);
   }
+
+  async function handleGoogleCredential(credential: string) {
+    setError(null);
+    setLoading(true);
+    try {
+      const { access_token } = await auth.googleLogin(credential);
+      setToken(access_token);
+      onLogin();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const googleBlock = GOOGLE_ENABLED ? (
+    <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 10, color: "var(--muted)", fontSize: 11 }}>
+        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+        <span>OR</span>
+        <div style={{ flex: 1, height: 1, background: "var(--border)" }} />
+      </div>
+      <div style={{ display: "flex", justifyContent: "center" }}>
+        <GoogleLogin
+          onSuccess={(r) => r.credential && handleGoogleCredential(r.credential)}
+          onError={() => setError("Google sign-in was cancelled or failed")}
+          theme="filled_black"
+          size="large"
+          text="continue_with"
+          shape="rectangular"
+        />
+      </div>
+    </div>
+  ) : null;
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
@@ -142,6 +179,8 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
           </button>
         </form>
 
+        {googleBlock}
+
         <div style={{ borderTop: "1px solid var(--border)", paddingTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
           <div style={{ fontSize: 12, color: "var(--muted)", textAlign: "center", marginBottom: 4 }}>New to Pulse?</div>
           <button type="button" onClick={() => switchMode("create_workspace")} style={{ background: "transparent", border: "1px solid var(--border)", color: "var(--fg)" }}>
@@ -197,6 +236,8 @@ export default function Login({ onLogin }: { onLogin: () => void }) {
         </Field>
         <button type="submit" disabled={disabled} style={{ marginTop: 4 }}>{submitLabel}</button>
       </form>
+
+      {googleBlock}
 
       <div style={{ textAlign: "center", fontSize: 13, color: "var(--muted)" }}>
         {isCreate ? (
