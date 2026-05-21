@@ -174,6 +174,17 @@ export const auth = {
 
   me: () => http<AuthUser>("/auth/me"),
 
+  verifyEmail: async (token: string): Promise<{ access_token: string; token_type: string }> => {
+    const headers: Record<string, string> = {};
+    if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
+    const res = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`, { headers });
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({ detail: "Verification failed" }));
+      throw new Error(err.detail || `${res.status}`);
+    }
+    return res.json();
+  },
+
   signup: async (
     username: string,
     email: string,
