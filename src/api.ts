@@ -133,6 +133,8 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     Object.entries(init.headers as Record<string, string>).forEach(([k, v]) => { headers[k] = v; });
   }
   if (token) headers["Authorization"] = `Bearer ${token}`;
+  // ngrok free tier shows a browser warning page; this header skips it for API calls.
+  if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
   const res = await fetch(API_BASE + path, { ...init, headers });
   if (res.status === 401) {
     clearToken();
@@ -156,9 +158,10 @@ export type AuthUser = {
 export const auth = {
   login: async (username: string, password: string): Promise<{ access_token: string; token_type: string }> => {
     const body = new URLSearchParams({ username, password });
+    const ngrokHeader = API_BASE ? { "ngrok-skip-browser-warning": "true" } : {};
     const res = await fetch(API_BASE + "/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      headers: { "Content-Type": "application/x-www-form-urlencoded", ...ngrokHeader },
       body: body.toString(),
     });
     if (!res.ok) {
@@ -175,9 +178,10 @@ export const auth = {
     email: string,
     password: string,
   ): Promise<{ access_token: string; token_type: string }> => {
+    const ngrokHeader = API_BASE ? { "ngrok-skip-browser-warning": "true" } : {};
     const res = await fetch(API_BASE + "/auth/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", ...ngrokHeader },
       body: JSON.stringify({ username, email, password }),
     });
     if (!res.ok) {
