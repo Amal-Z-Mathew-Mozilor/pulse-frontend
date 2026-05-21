@@ -110,7 +110,7 @@ export type AgentRun = {
 
 // In production (Vercel), set VITE_API_BASE_URL to your backend URL (e.g. ngrok).
 // In dev, leave it empty — Vite's proxy handles /api, /auth, /jira-webhook.
-const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
+export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.replace(/\/$/, "") ?? "";
 
 const TOKEN_KEY = "pulse_token";
 

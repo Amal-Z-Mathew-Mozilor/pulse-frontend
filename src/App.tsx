@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, auth, AuthUser, clearToken, getToken } from "./api";
+import { api, auth, AuthUser, clearToken, getToken, API_BASE } from "./api";
 import AlertFeed from "./components/AlertFeed";
 import Changelog from "./components/Changelog";
 import DeprecationList from "./components/DeprecationList";
@@ -98,7 +98,9 @@ export default function App() {
 
     async function load() {
       try {
-        const r = await fetch("/api/status");
+        const statusHeaders: Record<string, string> = {};
+        if (API_BASE) statusHeaders["ngrok-skip-browser-warning"] = "true";
+        const r = await fetch(API_BASE + "/api/status", { headers: statusHeaders });
 
         if (!r.ok) {
           throw new Error(`status ${r.status}`);
@@ -325,8 +327,8 @@ export default function App() {
         {status === null && (
           <div className="banner warn">
             <strong>Backend status unavailable.</strong> Pulse can't reach{" "}
-            <code>localhost:8000</code> — make sure uvicorn is running and your
-            Vite port is in <code>CORS_ORIGINS</code>.
+            <code>{API_BASE || "localhost:8000"}</code> — make sure uvicorn is running and your
+            Vercel URL is in <code>CORS_ORIGINS</code>.
           </div>
         )}
 
