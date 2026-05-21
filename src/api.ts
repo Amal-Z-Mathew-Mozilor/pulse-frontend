@@ -158,10 +158,11 @@ export type AuthUser = {
 export const auth = {
   login: async (username: string, password: string): Promise<{ access_token: string; token_type: string }> => {
     const body = new URLSearchParams({ username, password });
-    const ngrokHeader = API_BASE ? { "ngrok-skip-browser-warning": "true" } : {};
+    const loginHeaders: Record<string, string> = { "Content-Type": "application/x-www-form-urlencoded" };
+    if (API_BASE) loginHeaders["ngrok-skip-browser-warning"] = "true";
     const res = await fetch(API_BASE + "/auth/login", {
       method: "POST",
-      headers: { "Content-Type": "application/x-www-form-urlencoded", ...ngrokHeader },
+      headers: loginHeaders,
       body: body.toString(),
     });
     if (!res.ok) {
@@ -178,10 +179,11 @@ export const auth = {
     email: string,
     password: string,
   ): Promise<{ access_token: string; token_type: string }> => {
-    const ngrokHeader = API_BASE ? { "ngrok-skip-browser-warning": "true" } : {};
+    const signupHeaders: Record<string, string> = { "Content-Type": "application/json" };
+    if (API_BASE) signupHeaders["ngrok-skip-browser-warning"] = "true";
     const res = await fetch(API_BASE + "/auth/signup", {
       method: "POST",
-      headers: { "Content-Type": "application/json", ...ngrokHeader },
+      headers: signupHeaders,
       body: JSON.stringify({ username, email, password }),
     });
     if (!res.ok) {
