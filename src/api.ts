@@ -146,7 +146,23 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
     window.location.reload();
     throw new Error("Unauthorized");
   }
-  if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+  if (!res.ok) {
+    // Try to read FastAPI's `{"detail": "..."}` body so users see the real
+    // reason ("label 'Mozilor' is already used…") instead of a bare 409.
+    let message = `${res.status} ${res.statusText}`;
+    try {
+      const body = await res.json();
+      if (body && typeof body.detail === "string") {
+        message = body.detail;
+      } else if (Array.isArray(body?.detail) && body.detail[0]?.msg) {
+        // Pydantic validation errors come back as an array of dicts.
+        message = body.detail.map((d: { msg: string }) => d.msg).join("; ");
+      }
+    } catch {
+      // body wasn't JSON — fall through to the status text
+    }
+    throw new Error(message);
+  }
   if (res.status === 204) return undefined as T;
   return res.json();
 }

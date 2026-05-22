@@ -197,8 +197,42 @@ export default function JiraAccounts() {
       </p>
 
       {errorMsg && (
-        <div className="banner warn" style={{ marginBottom: 16 }}>
-          {errorMsg}
+        <div
+          role="alert"
+          style={{
+            display: "flex",
+            alignItems: "flex-start",
+            gap: 12,
+            padding: "12px 14px",
+            marginBottom: 16,
+            border: "1px solid rgba(255, 94, 110, 0.35)",
+            background: "rgba(255, 94, 110, 0.08)",
+            borderRadius: 10,
+            color: "#ffb4bc",
+            fontSize: 13,
+            lineHeight: 1.5,
+          }}
+        >
+          <span style={{ fontSize: 16, lineHeight: 1, marginTop: 1 }}>⚠️</span>
+          <span style={{ flex: 1 }}>{errorMsg}</span>
+          <button
+            type="button"
+            aria-label="Dismiss"
+            onClick={() => setErrorMsg(null)}
+            style={{
+              background: "none",
+              border: "none",
+              color: "inherit",
+              padding: 0,
+              cursor: "pointer",
+              fontSize: 16,
+              lineHeight: 1,
+              opacity: 0.7,
+              boxShadow: "none",
+            }}
+          >
+            ✕
+          </button>
         </div>
       )}
 
