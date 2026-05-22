@@ -44,15 +44,7 @@ export default function DeprecationList() {
               <strong>Reason:</strong> {f.deprecation_reason}
             </div>
           )}
-          {f.ticket_key && (
-            <div className="muted" style={{ marginTop: 8 }}>
-              From: {f.jira_base_url ? (
-                <a href={`${f.jira_base_url.replace(/\/$/, "")}/browse/${f.ticket_key}`} target="_blank" rel="noreferrer">
-                  {f.ticket_key}
-                </a>
-              ) : f.ticket_key}
-            </div>
-          )}
+          {f.ticket_key && <div className="muted" style={{ marginTop: 8 }}>From: {f.ticket_key}</div>}
         </div>
       ))}
     </>

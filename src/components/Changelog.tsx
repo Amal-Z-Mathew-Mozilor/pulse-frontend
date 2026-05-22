@@ -47,15 +47,7 @@ export default function Changelog() {
           </div>
           <p style={{ marginTop: 10, marginBottom: 8 }}>{f.summary}</p>
           {f.changelog && <div className="tool-call">{f.changelog}</div>}
-          {f.ticket_key && (
-            <div className="muted" style={{ marginTop: 8 }}>
-              From: {f.jira_base_url ? (
-                <a href={`${f.jira_base_url.replace(/\/$/, "")}/browse/${f.ticket_key}`} target="_blank" rel="noreferrer">
-                  {f.ticket_key}
-                </a>
-              ) : f.ticket_key}
-            </div>
-          )}
+          {f.ticket_key && <div className="muted" style={{ marginTop: 8 }}>From: {f.ticket_key}</div>}
         </div>
       ))}
     </>
