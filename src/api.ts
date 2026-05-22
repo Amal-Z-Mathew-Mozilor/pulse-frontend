@@ -273,6 +273,64 @@ export const api = {
       body: JSON.stringify({ message }),
     }),
 
+  /**
+   * Streaming variant of `ask`. Calls `onEvent` repeatedly as the backend
+   * emits SSE events (text deltas, tool calls, the final done event). Returns
+   * a Promise that resolves when the stream finishes or an error occurs.
+   *
+   * Pattern: the answer is built up by appending each {type: "text", delta}
+   * chunk to the current message; the {type: "done", tool_calls} arrives last.
+   */
+  askStream: async (
+    message: string,
+    onEvent: (event: {
+      type: "text" | "tool" | "done" | "error";
+      delta?: string;
+      name?: string;
+      tool_calls?: AgentRun["tool_calls"];
+    }) => void,
+  ): Promise<void> => {
+    const token = getToken();
+    const headers: Record<string, string> = { "Content-Type": "application/json" };
+    if (token) headers["Authorization"] = `Bearer ${token}`;
+    if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
+
+    const res = await fetch(`${API_BASE}/api/ask/stream`, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ message }),
+    });
+    if (res.status === 401) {
+      clearToken();
+      window.location.reload();
+      throw new Error("Unauthorized");
+    }
+    if (!res.ok) throw new Error(`${res.status} ${res.statusText}`);
+    if (!res.body) throw new Error("No response body for streaming");
+
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      // SSE messages are separated by \n\n. Parse complete messages, keep partial in buffer.
+      const parts = buffer.split("\n\n");
+      buffer = parts.pop() ?? "";
+      for (const part of parts) {
+        const line = part.split("\n").find((l) => l.startsWith("data: "));
+        if (!line) continue;
+        try {
+          const event = JSON.parse(line.slice(6));
+          onEvent(event);
+        } catch {
+          // Ignore malformed events — the stream might be ending or have a stray heartbeat
+        }
+      }
+    }
+  },
+
   features: (status?: string) =>
     http<Feature[]>(`/api/features${status ? `?status=${encodeURIComponent(status)}` : ""}`),
 
