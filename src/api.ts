@@ -13,6 +13,11 @@ export type Feature = {
   restored_reason?: string | null;
   created_at: string;
   updated_at: string;
+  // Which connected Jira workspace this feature belongs to.
+  // null when the originating account was deleted (historical org memory).
+  jira_account_id?: number | null;
+  jira_account_label?: string | null;
+  jira_base_url?: string | null;
 };
 
 export type FeatureSearchHit = { feature: Feature; score: number };
