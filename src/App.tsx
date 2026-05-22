@@ -228,6 +228,7 @@ export default function App() {
             <div
               key={t.id}
               className={`nav-item ${isActive ? "active" : ""}`}
+              data-tab={t.id}
               onClick={() => selectTab(t.id, t.section)}
             >
               <span>{t.label}</span>
