@@ -245,66 +245,41 @@ export default function App() {
         })}
 
         {status && (
-          <div
-            style={{
-              marginTop: 28,
-              fontSize: 11,
-              color: "var(--muted)",
-              lineHeight: 1.7,
-            }}
-          >
-            <div>Model: {status.model}</div>
-
-            <div>
-              Claude API:{" "}
-              {status.anthropic_configured ? "✓ live" : "✗ stub mode"}
+          <div className="sidebar-status">
+            <div className="sidebar-status-row">
+              <span className="label">Model</span>
+              <span className="value" title={status.model}>{status.model.replace("claude-", "")}</span>
             </div>
-
-            <div>
-              Embeddings:{" "}
-              {status.local_embeddings_available
-                ? "✓ local (MiniLM)"
-                : "✗ hash fallback"}
+            <div className="sidebar-status-row">
+              <span className="label">Claude</span>
+              <span className={`value ${status.anthropic_configured ? "ok" : "bad"}`}>
+                {status.anthropic_configured ? "live" : "stub"}
+              </span>
             </div>
-
-            <div>
-              Vector store:{" "}
-              {status.vector_store === "pinecone"
-                ? "✓ Pinecone"
-                : "in-memory"}
+            <div className="sidebar-status-row">
+              <span className="label">Vectors</span>
+              <span className="value ok">pgvector</span>
             </div>
-
-            <div>
-              Jira: {status.jira_configured
-                ? `✓ ${status.jira_account_count ?? 1} account${(status.jira_account_count ?? 1) === 1 ? "" : "s"}`
-                : "✗ not configured"}
+            <div className="sidebar-status-row">
+              <span className="label">Jira</span>
+              <span className={`value ${status.jira_configured ? "ok" : "bad"}`}>
+                {status.jira_configured
+                  ? `${status.jira_account_count ?? 1} acct${(status.jira_account_count ?? 1) === 1 ? "" : "s"}`
+                  : "off"}
+              </span>
             </div>
-
-            <div>
-              Webhook secret:{" "}
-              {status.jira_webhook_secured ? "✓ set" : "✗ unset"}
+            <div className="sidebar-status-row">
+              <span className="label">Webhook</span>
+              <span className={`value ${status.jira_webhook_secured ? "ok" : "bad"}`}>
+                {status.jira_webhook_secured ? "secured" : "unset"}
+              </span>
             </div>
           </div>
         )}
 
-        <div
-          style={{
-            marginTop: "auto",
-            paddingTop: 24,
-            borderTop: "1px solid var(--border)",
-          }}
-        >
-          <div
-            style={{
-              fontSize: 12,
-              color: "var(--muted)",
-              marginBottom: 8,
-            }}
-          >
-            {user.username}
-            {user.is_admin && " · admin"}
-          </div>
-
+        <div className="sidebar-user">
+          <div className="sidebar-user-name">{user.username}</div>
+          <div className="sidebar-user-role">{user.is_admin ? "Admin" : "Member"}</div>
           <button
             className="secondary"
             style={{ width: "100%", fontSize: 12 }}
