@@ -25,7 +25,7 @@ export default function AlertFeed() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 5000);
+    const t = setInterval(load, 30_000);
     return () => clearInterval(t);
   }, []);
 

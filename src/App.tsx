@@ -120,7 +120,7 @@ export default function App() {
 
     load();
 
-    const t = setInterval(load, 10_000);
+    const t = setInterval(load, 30_000);
 
     return () => {
       cancelled = true;
@@ -174,7 +174,7 @@ export default function App() {
 
     tick();
 
-    const t = setInterval(tick, 8_000);
+    const t = setInterval(tick, 30_000);
 
     return () => {
       cancelled = true;

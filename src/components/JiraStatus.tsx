@@ -23,7 +23,7 @@ export default function JiraStatus() {
 
   useEffect(() => {
     load();
-    const t = setInterval(load, 4000);
+    const t = setInterval(load, 30_000);
     return () => clearInterval(t);
   }, []);
 
