@@ -64,14 +64,15 @@ export default function JiraStatus() {
     <>
       <h2>Jira & Agents</h2>
       <p className="page-sub">
-        Real-time view of agent runs triggered by Jira webhooks. Polls every 4 seconds.
+        Live view of what Pulse is doing as your Jira tickets move through the workflow.
       </p>
 
       <div className="banner">
-        <strong>Webhook endpoint:</strong> <code>POST /jira/webhook?token=&lt;JIRA_WEBHOOK_SECRET&gt;</code>
+        <strong>How this works:</strong> Pulse listens for ticket events from your connected Jira
+        workspaces and runs AI agents to spot duplicates, deprecations, and cross-team overlap.
         <div className="muted" style={{ marginTop: 6 }}>
-          Configure this URL in Atlassian → Jira settings → System → Webhooks. Point it at your
-          ngrok HTTPS tunnel. Projects are auto-discovered — no allowlist.
+          New projects are discovered automatically the first time a ticket is created in them.
+          You can manually trigger a project refresh with the button below.
         </div>
       </div>
 

@@ -83,8 +83,8 @@ export default function AlertFeed() {
       const msg = e instanceof Error ? e.message : String(e);
       setError(
         msg.includes("405") || msg.includes("404")
-          ? "Delete failed — the backend doesn't have this route. Restart uvicorn to load the new code."
-          : `Delete failed: ${msg}`,
+          ? "Couldn't delete that alert — Pulse is updating. Please refresh in a moment."
+          : "Couldn't delete that alert. Please try again.",
       );
     } finally {
       setBusy((s) => {
@@ -106,8 +106,8 @@ export default function AlertFeed() {
       const msg = e instanceof Error ? e.message : String(e);
       setError(
         msg.includes("405") || msg.includes("404")
-          ? "Bulk delete failed — the backend doesn't have this route. Restart uvicorn to load the new code."
-          : `Bulk delete failed: ${msg}`,
+          ? "Couldn't clear those alerts — Pulse is updating. Please refresh in a moment."
+          : "Couldn't clear those alerts. Please try again.",
       );
     } finally {
       setBulkBusy(false);

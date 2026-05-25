@@ -154,10 +154,12 @@ export default function JiraAccounts() {
 
   async function deleteAccount(account: JiraAccount) {
     const confirmed = window.confirm(
-      `Delete account "${account.label}"?\n\n` +
-        `This removes all projects and ticket cache under this Jira workspace.\n` +
-        `Features (organizational memory) are preserved but become detached.\n` +
-        `Cannot be undone.`,
+      `Disconnect "${account.label}" from Pulse?\n\n` +
+        `New tickets from this Jira workspace will stop flowing in, and the projects ` +
+        `under it will be removed from your workspace view.\n\n` +
+        `Don't worry — the features Pulse has already learned about will stay in your ` +
+        `history, so you can still search and reference them.\n\n` +
+        `This action cannot be undone.`,
     );
     if (!confirmed) return;
     try {
@@ -191,9 +193,9 @@ export default function JiraAccounts() {
     <>
       <h2>Jira Accounts</h2>
       <p className="page-sub">
-        Each row is a connected Jira workspace. Tokens are encrypted at rest and never
-        leave the server. Add multiple accounts here to track projects across more than one
-        Atlassian instance.
+        Each row is a connected Jira workspace. Your API tokens are stored securely and never
+        shown back to anyone. Connect multiple workspaces here to let Pulse spot duplicate work
+        across all of them.
       </p>
 
       {errorMsg && (
@@ -325,8 +327,8 @@ export default function JiraAccounts() {
                 className="muted"
                 style={{ marginTop: 4, fontSize: 11, fontStyle: "italic" }}
               >
-                Tip: set PULSE_PUBLIC_BASE_URL in <code>.env</code> (e.g. your ngrok or
-                production URL) so this row shows the full URL ready to paste.
+                The full webhook URL will appear here once Pulse finishes setting up.
+                Contact your administrator if this stays visible.
               </div>
             )}
             {!a.has_webhook_secret && (
@@ -334,8 +336,9 @@ export default function JiraAccounts() {
                 className="banner warn"
                 style={{ marginTop: 8, marginBottom: 0, fontSize: 12 }}
               >
-                No webhook secret set — incoming webhooks will be rejected. Click <em>Edit</em>
-                {" "}and add one, then paste it into Jira's webhook config.
+                This workspace isn't fully connected yet — Pulse will ignore updates
+                from Jira until a security passcode is added. Click <em>Edit</em>, set
+                a passcode, then paste the webhook URL above into your Jira admin settings.
               </div>
             )}
 
@@ -346,7 +349,7 @@ export default function JiraAccounts() {
               >
                 {test.ok
                   ? `✓ Connected as ${test.user_displayname || test.user_email || "Jira user"}.`
-                  : `✗ ${test.message}${test.status_code ? ` (HTTP ${test.status_code})` : ""}`}
+                  : `✗ ${friendlyTestError(test.status_code, test.message)}`}
               </div>
             )}
 
@@ -503,4 +506,27 @@ function AccountFormFields({
       </div>
     </>
   );
+}
+
+/** Translate a Jira /myself test failure into something a customer can act on. */
+function friendlyTestError(statusCode: number | null | undefined, raw: string | null | undefined): string {
+  const msg = (raw || "").trim();
+  switch (statusCode) {
+    case 401:
+      return "The API token isn't valid. It may have expired or been revoked — generate a new one in Atlassian and update it via Edit.";
+    case 403:
+      return "This account doesn't have permission to read the Jira workspace. Make sure the service account has 'Browse projects' access.";
+    case 404:
+      return "We couldn't find the Jira workspace at that URL. Double-check the Base URL is correct.";
+    case 429:
+      return "Atlassian rate-limited the connection check. Wait a moment and try again.";
+    case undefined:
+    case null:
+      return msg || "Couldn't reach Atlassian. Check your internet connection and the Base URL.";
+    default:
+      if (statusCode >= 500) {
+        return "Atlassian's service is temporarily unavailable. Try again in a minute.";
+      }
+      return msg || "Connection failed. Check the Base URL, email, and API token.";
+  }
 }
