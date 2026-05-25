@@ -70,6 +70,12 @@ export type JiraAccount = {
   is_default: boolean;
   has_token: boolean;
   has_webhook_secret: boolean;
+  // Persistent health snapshot, updated by every sync attempt.
+  // "never" = no sync yet, "ok" = last sync worked, "auth_failed" = token
+  // expired/invalid, "not_found" = base URL wrong, "unreachable" = network/5xx.
+  last_sync_status: "never" | "ok" | "auth_failed" | "not_found" | "unreachable" | "error";
+  last_sync_at?: string | null;
+  last_sync_error?: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -400,6 +406,15 @@ export const api = {
       new_projects: string[];
       deleted_projects: string[];
       error?: string;
+      accounts: {
+        account_id: number;
+        account_label: string;
+        synced: number;
+        new_projects: string[];
+        deleted_projects: string[];
+        error?: string;
+        status?: "ok" | "auth_failed" | "not_found" | "unreachable" | "error";
+      }[];
     }>("/api/projects/sync", { method: "POST" }),
 
   jiraAccounts: {

@@ -254,6 +254,7 @@ export default function JiraAccounts() {
             <div className="row">
               <strong>{a.label}</strong>
               <span className="muted">{a.base_url}</span>
+              <ConnectionPill account={a} />
               <div className="spacer" />
               {a.is_default && (
                 <span className="badge active" title="Default account — webhooks and unscoped operations route here">
@@ -529,4 +530,85 @@ function friendlyTestError(statusCode: number | null | undefined, raw: string | 
       }
       return msg || "Connection failed. Check the Base URL, email, and API token.";
   }
+}
+
+/** Health pill showing the persistent connection state of a Jira account.
+ *  Lights up green / amber / red so users can spot broken connections at a
+ *  glance, without needing to click "Test" on every row. */
+function ConnectionPill({ account }: { account: JiraAccount }) {
+  const status = account.last_sync_status;
+  const since = account.last_sync_at ? new Date(account.last_sync_at).toLocaleString() : null;
+
+  let label = "Not checked yet";
+  let tone: "neutral" | "ok" | "warn" | "bad" = "neutral";
+  let tip = "Pulse hasn't tried to sync this workspace yet. Click Sync from Jira on the Jira & Agents tab.";
+
+  switch (status) {
+    case "ok":
+      label = "Connected";
+      tone = "ok";
+      tip = since ? `Last successful sync: ${since}` : "Last sync succeeded.";
+      break;
+    case "auth_failed":
+      label = "Token expired";
+      tone = "bad";
+      tip = (account.last_sync_error || "The API token isn't accepted by Atlassian — generate a new one and update it via Edit.")
+        + (since ? `\nFailed at ${since}` : "");
+      break;
+    case "not_found":
+      label = "Wrong URL";
+      tone = "bad";
+      tip = (account.last_sync_error || "Atlassian couldn't find a workspace at this Base URL.")
+        + (since ? `\nFailed at ${since}` : "");
+      break;
+    case "unreachable":
+      label = "Can't reach Jira";
+      tone = "warn";
+      tip = (account.last_sync_error || "Atlassian is unreachable right now. Pulse will retry automatically.")
+        + (since ? `\nFailed at ${since}` : "");
+      break;
+    case "error":
+      label = "Sync error";
+      tone = "warn";
+      tip = (account.last_sync_error || "Something went wrong on the last sync.")
+        + (since ? `\nFailed at ${since}` : "");
+      break;
+  }
+
+  const palette = {
+    neutral: { bg: "rgba(139,145,163,0.10)", bd: "rgba(139,145,163,0.45)", fg: "var(--muted)", dot: "var(--muted)" },
+    ok:      { bg: "rgba(56,224,127,0.12)", bd: "rgba(56,224,127,0.50)", fg: "var(--good)",  dot: "var(--good)" },
+    warn:    { bg: "rgba(255,187,85,0.12)", bd: "rgba(255,187,85,0.50)", fg: "var(--warn)",  dot: "var(--warn)" },
+    bad:     { bg: "rgba(255,94,110,0.12)", bd: "rgba(255,94,110,0.50)", fg: "var(--bad)",   dot: "var(--bad)" },
+  }[tone];
+
+  return (
+    <span
+      title={tip}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "3px 10px",
+        borderRadius: 999,
+        fontSize: 11,
+        fontWeight: 600,
+        letterSpacing: "0.03em",
+        background: palette.bg,
+        border: `1px solid ${palette.bd}`,
+        color: palette.fg,
+      }}
+    >
+      <span
+        style={{
+          width: 7,
+          height: 7,
+          borderRadius: "50%",
+          background: palette.dot,
+          boxShadow: tone === "ok" ? `0 0 6px ${palette.dot}` : undefined,
+        }}
+      />
+      {label}
+    </span>
+  );
 }
