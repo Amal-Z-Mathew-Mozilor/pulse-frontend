@@ -1230,3 +1230,140 @@ textarea { width: 100%; resize: vertical; min-height: 80px; }
   letter-spacing: 0.05em;
   margin-bottom: 10px;
 }
+
+/* ============ Alert read/unread states ============ */
+
+/* Filter tabs above the list */
+.alert-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+.alert-filter button {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--muted);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 7px;
+  box-shadow: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.alert-filter button:hover:not(.active):not(:disabled) {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text);
+  box-shadow: none;
+  transform: none;
+}
+.alert-filter button.active {
+  background: linear-gradient(135deg, rgba(91, 140, 255, 0.2), rgba(124, 92, 255, 0.15));
+  color: var(--text);
+  border-color: rgba(91, 140, 255, 0.4);
+}
+.alert-filter .count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 18px;
+  height: 16px;
+  padding: 0 5px;
+  margin-left: 6px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 700;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text);
+  vertical-align: 1px;
+}
+.alert-filter button.active .count {
+  background: rgba(91, 140, 255, 0.35);
+}
+
+/* Unread alert card — bold, accent left rail, subtle blue tint */
+.card.alert-unread {
+  border-left: 3px solid var(--accent);
+  background:
+    linear-gradient(90deg, rgba(91, 140, 255, 0.10), transparent 30%),
+    rgba(20, 22, 31, 0.65);
+}
+.card.alert-unread strong {
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* The blue "unread" dot — like Gmail's dot, or Slack's unread indicator */
+.unread-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(91, 140, 255, 0.6);
+  flex-shrink: 0;
+  margin-right: 6px;
+  animation: unreadPulse 2.5s ease-in-out infinite;
+}
+@keyframes unreadPulse {
+  0%, 100% { box-shadow: 0 0 8px rgba(91, 140, 255, 0.4); opacity: 1; }
+  50%      { box-shadow: 0 0 14px rgba(91, 140, 255, 0.8); opacity: 0.85; }
+}
+
+/* Read alert card — clearly de-emphasized */
+.card.alert-read {
+  opacity: 0.62;
+  background: rgba(20, 22, 31, 0.45);
+  border-left: 3px solid transparent;
+}
+.card.alert-read strong {
+  font-weight: 500;
+  color: var(--muted);
+}
+.card.alert-read:hover {
+  opacity: 0.85;
+}
+
+/* Tag on the right edge to make the state explicit on a quick scan */
+.alert-state-tag {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+}
+.alert-state-tag.unread {
+  color: var(--accent);
+  background: rgba(91, 140, 255, 0.12);
+  border: 1px solid rgba(91, 140, 255, 0.35);
+}
+.alert-state-tag.read {
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid var(--border);
+}
+
+/* Group divider between unread and read sections */
+.alert-group-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0 12px;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.alert-group-divider::before,
+.alert-group-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
