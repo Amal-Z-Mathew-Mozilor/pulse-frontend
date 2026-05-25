@@ -100,6 +100,9 @@ export default function App() {
       try {
         const statusHeaders: Record<string, string> = {};
         if (API_BASE) statusHeaders["ngrok-skip-browser-warning"] = "true";
+        // /api/status is now auth-required (org-scoped). Send the JWT.
+        const token = getToken();
+        if (token) statusHeaders["Authorization"] = `Bearer ${token}`;
         const r = await fetch(API_BASE + "/api/status", { headers: statusHeaders });
 
         if (!r.ok) {
