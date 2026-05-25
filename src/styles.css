@@ -1367,3 +1367,46 @@ textarea { width: 100%; resize: vertical; min-height: 80px; }
   height: 1px;
   background: var(--border);
 }
+
+/* ============ Connection pill (top-right floating indicator) ============ */
+.connection-pill {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 1000;
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 8px 14px;
+  background: rgba(255, 187, 85, 0.10);
+  border: 1px solid rgba(255, 187, 85, 0.35);
+  backdrop-filter: blur(12px) saturate(140%);
+  -webkit-backdrop-filter: blur(12px) saturate(140%);
+  border-radius: 999px;
+  color: var(--warn);
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.05) inset,
+    0 6px 20px rgba(0, 0, 0, 0.3),
+    0 0 16px rgba(255, 187, 85, 0.15);
+  animation: connPillIn 0.25s ease-out;
+  user-select: none;
+}
+@keyframes connPillIn {
+  from { transform: translateY(-8px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.connection-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--warn);
+  box-shadow: 0 0 8px rgba(255, 187, 85, 0.7);
+  animation: connDotPulse 1.4s ease-in-out infinite;
+}
+@keyframes connDotPulse {
+  0%, 100% { opacity: 1;   box-shadow: 0 0 6px rgba(255, 187, 85, 0.5); }
+  50%      { opacity: 0.5; box-shadow: 0 0 14px rgba(255, 187, 85, 1.0); }
+}

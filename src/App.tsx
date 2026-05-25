@@ -58,6 +58,9 @@ export default function App() {
   const [notifs, setNotifs] = useState<NotificationState>(EMPTY_NOTIFS);
   const [user, setUser] = useState<AuthUser | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
+  // "checking" = initial (no pill), "ok" = connected (no pill),
+  // "offline" = at least one failure after first success (show pill).
+  const [conn, setConn] = useState<"checking" | "ok" | "offline">("checking");
 
   // Validate stored token on mount
   useEffect(() => {
@@ -113,10 +116,13 @@ export default function App() {
 
         if (!cancelled) {
           setStatus(data);
+          setConn("ok");
         }
       } catch {
         if (!cancelled) {
-          setStatus(null);
+          // Keep the last-known-good status visible. Only flip the connection
+          // pill once we've actually tried at least once.
+          setConn((prev) => (prev === "checking" ? "offline" : "offline"));
         }
       }
     }
@@ -295,19 +301,25 @@ export default function App() {
       </aside>
 
       <main className="main">
-        {status !== null && status.anthropic_configured === false && (
+        {status !== null && status.anthropic_configured === false && user.is_admin && (
+          // Admin-only banner — customers shouldn't see infrastructure jargon.
+          // Stub mode is a setup state that only the org admin needs to act on.
           <div className="banner warn">
-            <strong>Stub mode:</strong> no ANTHROPIC_API_KEY set. Agents will
-            use a deterministic substitute — the pipeline runs end-to-end but
-            reasoning quality is limited.
+            <strong>Setup incomplete:</strong> Pulse can't connect to its AI provider.
+            The agents will use a placeholder response until this is fixed —
+            ask your administrator to complete the setup.
           </div>
         )}
 
-        {status === null && (
-          <div className="banner warn">
-            <strong>Backend status unavailable.</strong> Pulse can't reach{" "}
-            <code>{API_BASE || "localhost:8000"}</code> — make sure uvicorn is running and your
-            Vercel URL is in <code>CORS_ORIGINS</code>.
+        {conn === "offline" && (
+          <div
+            className="connection-pill"
+            role="status"
+            aria-live="polite"
+            title="Pulse will keep trying automatically"
+          >
+            <span className="connection-dot" />
+            <span>Reconnecting to Pulse…</span>
           </div>
         )}
 
