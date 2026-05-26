@@ -1,13 +1,17 @@
 import { useEffect, useState } from "react";
 import { api, Feature } from "../api";
+import { getCached, setCached } from "../cache";
 import { formatISTDateTime } from "../utils/datetime";
 
+const CACHE_KEY = "features:changelog";
+
 export default function Changelog() {
-  const [features, setFeatures] = useState<Feature[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [features, setFeatures] = useState<Feature[]>(() => getCached<Feature[]>(CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => getCached<Feature[]>(CACHE_KEY) === null);
 
   useEffect(() => {
     api.changelog().then((f) => {
+      setCached(CACHE_KEY, f);
       setFeatures(f);
       setLoading(false);
     });

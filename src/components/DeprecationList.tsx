@@ -1,12 +1,16 @@
 import { useEffect, useState } from "react";
 import { api, Feature } from "../api";
+import { getCached, setCached } from "../cache";
+
+const CACHE_KEY = "features:deprecated";
 
 export default function DeprecationList() {
-  const [features, setFeatures] = useState<Feature[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [features, setFeatures] = useState<Feature[]>(() => getCached<Feature[]>(CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => getCached<Feature[]>(CACHE_KEY) === null);
 
   useEffect(() => {
     api.features("deprecated").then((f) => {
+      setCached(CACHE_KEY, f);
       setFeatures(f);
       setLoading(false);
     });

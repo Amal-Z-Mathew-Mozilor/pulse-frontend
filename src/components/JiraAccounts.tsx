@@ -5,6 +5,9 @@ import {
   JiraAccountCreate,
   JiraAccountTestResult,
 } from "../api";
+import { getCached, setCached } from "../cache";
+
+const CACHE_KEY = "jira_accounts";
 
 type FormState = {
   label: string;
@@ -27,8 +30,8 @@ const EMPTY_FORM: FormState = {
 };
 
 export default function JiraAccounts() {
-  const [accounts, setAccounts] = useState<JiraAccount[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [accounts, setAccounts] = useState<JiraAccount[]>(() => getCached<JiraAccount[]>(CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => getCached<JiraAccount[]>(CACHE_KEY) === null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [publicBaseUrl, setPublicBaseUrl] = useState<string | null>(null);
   const [copiedId, setCopiedId] = useState<number | null>(null);
@@ -50,6 +53,7 @@ export default function JiraAccounts() {
   async function load() {
     try {
       const rows = await api.jiraAccounts.list();
+      setCached(CACHE_KEY, rows);
       setAccounts(rows);
       setErrorMsg(null);
     } catch (err) {

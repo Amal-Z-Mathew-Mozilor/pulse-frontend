@@ -1,11 +1,17 @@
 import { useEffect, useState } from "react";
 import { AgentRun, api, Project } from "../api";
+import { getCached, setCached } from "../cache";
 import { formatISTDateTime } from "../utils/datetime";
 
+const CACHE_RUNS = "agent_runs";
+const CACHE_PROJECTS = "projects";
+
 export default function JiraStatus() {
-  const [runs, setRuns] = useState<AgentRun[]>([]);
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [runs, setRuns] = useState<AgentRun[]>(() => getCached<AgentRun[]>(CACHE_RUNS) ?? []);
+  const [projects, setProjects] = useState<Project[]>(() => getCached<Project[]>(CACHE_PROJECTS) ?? []);
+  const [loading, setLoading] = useState(
+    () => getCached<AgentRun[]>(CACHE_RUNS) === null || getCached<Project[]>(CACHE_PROJECTS) === null
+  );
   const [editingKey, setEditingKey] = useState<string | null>(null);
   const [editValue, setEditValue] = useState("");
   const [syncing, setSyncing] = useState(false);
@@ -14,6 +20,8 @@ export default function JiraStatus() {
   async function load() {
     try {
       const [r, p] = await Promise.all([api.agentRuns(20), api.projects()]);
+      setCached(CACHE_RUNS, r);
+      setCached(CACHE_PROJECTS, p);
       setRuns(r);
       setProjects(p);
     } finally {

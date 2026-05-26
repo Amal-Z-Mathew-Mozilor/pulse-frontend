@@ -1,13 +1,16 @@
 import { useEffect, useMemo, useState } from "react";
 import { Alert, api } from "../api";
+import { getCached, setCached } from "../cache";
 import { formatISTDateTime } from "../utils/datetime";
 import AlertDetailsPanel from "./AlertDetailsPanel";
+
+const CACHE_KEY = "alerts";
 
 type FilterMode = "all" | "unread" | "read";
 
 export default function AlertFeed() {
-  const [alerts, setAlerts] = useState<Alert[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [alerts, setAlerts] = useState<Alert[]>(() => getCached<Alert[]>(CACHE_KEY) ?? []);
+  const [loading, setLoading] = useState(() => getCached<Alert[]>(CACHE_KEY) === null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
   const [confirming, setConfirming] = useState<Set<number>>(new Set());
   const [bulkConfirming, setBulkConfirming] = useState(false);
@@ -22,6 +25,7 @@ export default function AlertFeed() {
 
   async function load() {
     const a = await api.alerts();
+    setCached(CACHE_KEY, a);
     setAlerts(a);
     setLoading(false);
   }
