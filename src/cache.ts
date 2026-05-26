@@ -1,37 +1,44 @@
 /**
- * Module-level in-memory cache for API responses.
+ * sessionStorage-backed cache for API responses.
  *
- * Survives tab switches (component unmount/remount) but is cleared on page
- * refresh. Components initialise their state from the cache so returning to
- * a tab shows data instantly, then refetch in the background to stay fresh.
+ * Survives tab switches AND page refreshes. Cleared automatically by the
+ * browser when the tab is closed, so there's no stale data on the next session.
  *
  * TTL is 5 minutes — after that the entry is treated as absent and the
  * component shows a spinner until the fresh fetch completes.
  */
 
 const TTL_MS = 5 * 60 * 1000;
+const PREFIX = "pulse_cache:";
 
 interface Entry<T> {
   data: T;
   ts: number;
 }
 
-const store = new Map<string, Entry<unknown>>();
-
 export function getCached<T>(key: string): T | null {
-  const entry = store.get(key) as Entry<T> | undefined;
-  if (!entry) return null;
-  if (Date.now() - entry.ts > TTL_MS) {
-    store.delete(key);
+  try {
+    const raw = sessionStorage.getItem(PREFIX + key);
+    if (!raw) return null;
+    const entry: Entry<T> = JSON.parse(raw);
+    if (Date.now() - entry.ts > TTL_MS) {
+      sessionStorage.removeItem(PREFIX + key);
+      return null;
+    }
+    return entry.data;
+  } catch {
     return null;
   }
-  return entry.data;
 }
 
 export function setCached<T>(key: string, data: T): void {
-  store.set(key, { data, ts: Date.now() });
+  try {
+    sessionStorage.setItem(PREFIX + key, JSON.stringify({ data, ts: Date.now() }));
+  } catch {
+    // sessionStorage can throw if storage quota is exceeded — fail silently.
+  }
 }
 
 export function invalidate(key: string): void {
-  store.delete(key);
+  sessionStorage.removeItem(PREFIX + key);
 }
