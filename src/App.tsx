@@ -89,6 +89,7 @@ export default function App() {
   }
 
   function handleLogout() {
+    void auth.logout(); // clear the server-side session cookie (best-effort)
     clearToken();
     setUser(null);
   }

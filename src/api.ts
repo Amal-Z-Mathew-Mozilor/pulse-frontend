@@ -146,7 +146,9 @@ async function http<T>(path: string, init?: RequestInit): Promise<T> {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   // ngrok free tier shows a browser warning page; this header skips it for API calls.
   if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
-  const res = await fetch(API_BASE + path, { ...init, headers });
+  // include => browser sends the HttpOnly session cookie and stores Set-Cookie
+  // from cross-site responses (dual-mode auth alongside the Bearer header).
+  const res = await fetch(API_BASE + path, { ...init, headers, credentials: "include" });
   if (res.status === 401) {
     clearToken();
     window.location.reload();
@@ -191,6 +193,7 @@ export const auth = {
       method: "POST",
       headers: loginHeaders,
       body: body.toString(),
+      credentials: "include",
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Login failed" }));
@@ -201,10 +204,15 @@ export const auth = {
 
   me: () => http<AuthUser>("/auth/me"),
 
+  // Clears the server-side HttpOnly session cookie. The Bearer token (in
+  // localStorage) is dropped separately by clearToken(). Best-effort — a
+  // failed call shouldn't block the client-side logout.
+  logout: () => http<{ message: string }>("/auth/logout", { method: "POST" }).catch(() => undefined),
+
   verifyEmail: async (token: string): Promise<{ access_token: string; token_type: string }> => {
     const headers: Record<string, string> = {};
     if (API_BASE) headers["ngrok-skip-browser-warning"] = "true";
-    const res = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`, { headers });
+    const res = await fetch(`${API_BASE}/auth/verify?token=${encodeURIComponent(token)}`, { headers, credentials: "include" });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Verification failed" }));
       throw new Error(err.detail || `${res.status}`);
@@ -234,6 +242,7 @@ export const auth = {
       method: "POST",
       headers,
       body: JSON.stringify({ access_token: accessToken }),
+      credentials: "include",
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Google sign-in failed" }));
@@ -252,6 +261,7 @@ export const auth = {
       method: "POST",
       headers,
       body: JSON.stringify({ token, new_password }),
+      credentials: "include",
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({ detail: "Reset failed" }));
@@ -321,6 +331,7 @@ export const api = {
       method: "POST",
       headers,
       body: JSON.stringify({ message }),
+      credentials: "include",
     });
     if (res.status === 401) {
       clearToken();
