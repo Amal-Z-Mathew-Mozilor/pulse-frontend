@@ -4,9 +4,13 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import App from "./App";
 import VerifyEmail from "./components/VerifyEmail";
 import ResetPassword from "./components/ResetPassword";
+import { initAnalytics } from "./analytics";
 import "./styles.css";
 
 const GOOGLE_CLIENT_ID = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || "";
+
+// Load GA4 if VITE_GA_MEASUREMENT_ID is configured (no-op otherwise).
+initAnalytics();
 
 const path = window.location.pathname;
 const route = path === "/verify-email" ? "verify"
