@@ -9,7 +9,10 @@
 //
 // Set the ID in Vercel env vars: VITE_GA_MEASUREMENT_ID=G-XXXXXXXXXX
 
-const MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined) || "";
+// Falls back to the baked-in GA4 ID when the env var isn't set. A GA4
+// Measurement ID is not a secret (it ships in plaintext to every visitor), so
+// hardcoding the default is safe and avoids env-var/build-cache pitfalls.
+const MEASUREMENT_ID = (import.meta.env.VITE_GA_MEASUREMENT_ID as string | undefined) || "G-MVHVSGV5FP";
 
 export function initAnalytics(): void {
   if (!MEASUREMENT_ID) return;
