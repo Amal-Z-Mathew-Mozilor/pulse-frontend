@@ -20,6 +20,23 @@ const route = path === "/verify-email" ? "verify"
 const tree = (
   <>
     {route === "verify" ? <VerifyEmail /> : route === "reset" ? <ResetPassword /> : <App />}
+    {/* Global cookie policy link — shown on every screen, incl. logged-out login. */}
+    <a
+      href="/cookie-policy"
+      target="_blank"
+      rel="noopener noreferrer"
+      style={{
+        position: "fixed",
+        bottom: 12,
+        right: 16,
+        fontSize: 11,
+        opacity: 0.55,
+        color: "inherit",
+        zIndex: 1000,
+      }}
+    >
+      Cookie Policy
+    </a>
   </>
 );
 

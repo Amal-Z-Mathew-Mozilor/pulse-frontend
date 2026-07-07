@@ -331,22 +331,6 @@ export default function App() {
         {tab === "jira" && <JiraStatus />}
         {tab === "accounts" && user.is_admin && <JiraAccounts />}
       </main>
-
-      <a
-        href="/cookie-policy"
-        target="_blank"
-        rel="noopener noreferrer"
-        style={{
-          position: "fixed",
-          bottom: 12,
-          right: 16,
-          fontSize: 11,
-          opacity: 0.55,
-          zIndex: 100,
-        }}
-      >
-        Cookie Policy
-      </a>
     </div>
   );
 }
