@@ -298,6 +298,20 @@ export default function App() {
           >
             Sign out
           </button>
+          <a
+            href="/cookie-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              display: "block",
+              marginTop: 8,
+              fontSize: 11,
+              opacity: 0.6,
+              textAlign: "center",
+            }}
+          >
+            Cookie Policy
+          </a>
         </div>
       </aside>
 
