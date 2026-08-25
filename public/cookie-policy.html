@@ -35,6 +35,16 @@
 
       <h1>Cookie Policy</h1>
 
+      <!-- TEST HARNESS: ?lang=xx overrides the page language before CookieYes reads it.
+           CookieYes resolves the policy language from document.documentElement.lang on
+           window load, so this must run BEFORE the script tag below. Remove when done. -->
+      <script>
+        (function () {
+          var q = new URLSearchParams(window.location.search).get('lang');
+          if (q !== null) document.documentElement.lang = q;
+        })();
+      </script>
+
       <!-- CookieYes injects the policy content immediately after this script tag. -->
       <!-- Start CookieYes cookie policy -->
       <script id="cky-cookie-policy" type="text/javascript" src="https://cdn.cookieyes-uat.com/client_data/308f3fe5a4716540e13eabebbd94d38e/cookie-policy/script.js"></script>
