@@ -47,8 +47,27 @@
 
       <!-- CookieYes injects the policy content immediately after this script tag. -->
       <!-- Start CookieYes cookie policy -->
-      <script id="cky-cookie-policy" type="text/javascript" src="https://cdn-mojoview.uk/client_data/f49e865592a9acbd1c47d55b6f16b700/cookie-policy/script.js"></script>
+      <script id="cky-cookie-policy" type="text/javascript" src="https://cdn.cookieyes-uat.com/client_data/a78e4d7fc05e1a50bab69879fe41a17a/cookie-policy/script.js"></script>
       <!-- End CookieYes cookie policy -->
+
+      <!-- WORKAROUND (temporary): redraw the cookie table from the Romanian bucket.
+           The policy script draws the table in the policy language (English); this waits
+           for that table, then re-renders it with the 'ro' cookie list. Must stay AFTER the
+           CookieYes cookie-policy script. Remove once the CPG fix ships. -->
+      <script>
+        (function () {
+          var tries = 0;
+          var timer = setInterval(function () {
+            var el = document.querySelector('.cky-audit-table-element');
+            if (el && el.children.length && typeof renderEmbeddedCookieList === 'function') {
+              renderEmbeddedCookieList('ro', 'ro');
+              clearInterval(timer);
+            } else if (++tries > 50) {
+              clearInterval(timer); // give up after ~10s
+            }
+          }, 200);
+        })();
+      </script>
 
       <a class="back" href="/">← Back to Pulse</a>
     </div>
